@@ -2267,6 +2267,11 @@ if (ENGINE_BUILD_TESTS OR ENGINE_BUILD_EXTENDED_TESTS OR ENGINE_BUILD_MODEL_TEST
     add_test(NAME sortformer_v2_schedule_test COMMAND sortformer_v2_schedule_test)
 
     if (ENGINE_BUILD_TESTS)
+        # Modified 2026-09-15: regressions for Cover Studio's YuE2 Vulkan fixes.
+        add_engine_unittest(rope_position_view_test tests/unittests/test_rope_position_view.cpp)
+        add_test(NAME rope_position_view_test COMMAND rope_position_view_test)
+        add_engine_unittest(col2im_dispatch_test tests/unittests/test_col2im_dispatch.cpp)
+
         if(kokoro_tts IN_LIST AUDIOCPP_LINKED_MODELS)
             add_engine_unittest(kokoro_cpu_kernel_test tests/kokoro_tts/kokoro_cpu_kernel_test.cpp)
             add_engine_unittest(kokoro_g2p_probe tests/kokoro_tts/kokoro_g2p_probe.cpp)
@@ -2821,7 +2826,6 @@ if (ENGINE_BUILD_TESTS OR ENGINE_BUILD_EXTENDED_TESTS OR ENGINE_BUILD_MODEL_TEST
             NAME qwen_decoder_packed_projection_test
             COMMAND qwen_decoder_packed_projection_test
         )
-
         add_engine_unittest(supertonic_vector_convnext_exp_test tests/unittests/test_supertonic_vector_convnext_exp.cpp)
         add_test(
             NAME supertonic_vector_convnext_exp_test

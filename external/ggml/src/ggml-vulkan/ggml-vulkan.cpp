@@ -1,3 +1,4 @@
+// Modified 2026-09-15: bound COL2IM_1D dispatch using its existing grid-stride loop.
 #include "ggml-vulkan.h"
 #include <vulkan/vulkan_core.h>
 #if defined(GGML_VULKAN_RUN_TESTS) || defined(GGML_VULKAN_CHECK_RESULTS)
@@ -10382,7 +10383,10 @@ static void ggml_vk_op_f32(ggml_backend_vk_context * ctx, vk_context& subctx, co
     case GGML_OP_COL2IM_1D:
         {
             const uint32_t total = (uint32_t)(dst->ne[0] * dst->ne[1]);
-            elements = { total, 1, 1 };
+            // The shader's grid-stride loop covers the remaining output when
+            // a long audio tensor exceeds the device's X dispatch limit.
+            const uint64_t max_elements = uint64_t(ctx->device->properties.limits.maxComputeWorkGroupCount[0]) * pipeline->wg_denoms[0];
+            elements = { (uint32_t)std::min<uint64_t>(total, max_elements), 1, 1 };
         } break;
     case GGML_OP_IM2COL_3D:
         {

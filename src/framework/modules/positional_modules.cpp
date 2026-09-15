@@ -1,3 +1,4 @@
+// Modified 2026-09-15: align sliced RoPE positions for YuE2 Vulkan generation.
 #include "engine/framework/modules/positional_modules.h"
 
 #include "engine/framework/modules/structural_modules.h"
@@ -72,11 +73,20 @@ core::TensorValue RoPEModule::build(
             core::TensorShape::from_dims({config_.dimensions / 2}),
             "RoPE frequency factors");
     }
+    // A sliced int32 position (e.g. CFG batch row 1) can start four bytes
+    // into its parent buffer. Vulkan's RoPE shader does not carry a source
+    // offset for positions and requires an aligned storage-buffer binding.
+    // Contiguous strides alone do not guarantee that alignment: materialize
+    // offset views into a fresh backend-aligned allocation, preserving values.
+    ggml_tensor * position_tensor = positions.tensor;
+    if (ctx.backend_type == core::BackendType::Vulkan && position_tensor->view_offs != 0) {
+        position_tensor = ggml_cont(ctx.ggml, position_tensor);
+    }
     return core::wrap_tensor(
         ggml_rope_ext(
             ctx.ggml,
             input.tensor,
-            positions.tensor,
+            position_tensor,
             frequency_factors != nullptr ? frequency_factors->tensor : nullptr,
             static_cast<int>(config_.dimensions),
             config_.mode,
