@@ -2575,7 +2575,7 @@ if (ENGINE_BUILD_TESTS OR ENGINE_BUILD_EXTENDED_TESTS OR ENGINE_BUILD_MODEL_TEST
     add_test(NAME sortformer_v2_schedule_test COMMAND sortformer_v2_schedule_test)
 
     if (ENGINE_BUILD_TESTS)
-        # Modified 2026-09-15: regressions for Cover Studio's YuE2 Vulkan fixes.
+        # Modified 2026-09-15: regressions for Ghost Band's YuE2 Vulkan fixes.
         add_engine_unittest(rope_position_view_test tests/unittests/test_rope_position_view.cpp)
         add_test(NAME rope_position_view_test COMMAND rope_position_view_test)
         add_engine_unittest(col2im_dispatch_test tests/unittests/test_col2im_dispatch.cpp)

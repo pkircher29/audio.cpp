@@ -1,10 +1,10 @@
-name: Cover Studio regression
+name: Ghost Band regression
 
 on:
   push:
-    branches: [cover-studio, fix/yue2-vulkan-alignment]
+    branches: [ghost-band, fix/yue2-vulkan-alignment]
   pull_request:
-    branches: [cover-studio]
+    branches: [ghost-band]
   workflow_dispatch:
 
 permissions:
@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Configure the tested model set with tests enabled
         run: >-
-          cmake -S . -B build/cover-studio-ci
+          cmake -S . -B build/ghost-band-ci
           -DCMAKE_BUILD_TYPE=Release
           -DENGINE_ENABLE_CUDA=OFF
           -DENGINE_ENABLE_VULKAN=OFF
@@ -25,8 +25,8 @@ jobs:
           -DAUDIOCPP_MODEL_SET=custom
           '-DAUDIOCPP_MODELS=yue2;qwen3_asr'
       - name: Build focused regressions
-        run: cmake --build build/cover-studio-ci --parallel 4 --target rope_position_view_test col2im_dispatch_test
+        run: cmake --build build/ghost-band-ci --parallel 4 --target rope_position_view_test col2im_dispatch_test
       - name: Run RoPE CPU reference regression
-        run: ctest --test-dir build/cover-studio-ci --output-on-failure --no-tests=error -R '^rope_position_view_test$'
-      # Physical Vulkan GPU runs are documented in COVER_STUDIO_GPU_FIXES.md.
+        run: ctest --test-dir build/ghost-band-ci --output-on-failure --no-tests=error -R '^rope_position_view_test$'
+      # Physical Vulkan GPU runs are documented in GHOST_BAND_GPU_FIXES.md.
       # A hosted CPU runner cannot establish hardware GPU correctness.
