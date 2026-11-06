@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cstdint>
+#include <cstdlib>
 #include <stdexcept>
 #include <utility>
 
@@ -208,6 +209,18 @@ public:
         }
         ensure_nar();
         ensure_ar();
+        auto context = generation.context;
+        // Optional memory budget for the existing complete-output chunk path.
+        // Keep every codec frame; limit only how many are synthesized at once.
+        if (const char * budget = std::getenv("AUDIOCPP_YUE2_NAR_CHUNK_TOKENS")) {
+            char * end = nullptr;
+            const long chunk = std::strtol(budget, &end, 10);
+            if (end == budget || *end != '\0' || chunk < 1 || chunk > 8192) {
+                throw std::runtime_error("AUDIOCPP_YUE2_NAR_CHUNK_TOKENS must be in [1,8192]");
+            }
+            context = std::min<int64_t>(context,
+                static_cast<int64_t>(semantic.plan.prefix.size()) + 2 * chunk + 3);
+        }
         return nar->synthesize(
             semantic.plan.prefix,
             codec,
@@ -217,7 +230,7 @@ public:
             noise,
             seed,
             generation.ode_steps,
-            generation.context);
+            context);
     }
 
     runtime::AudioBuffer decode_audio(const std::vector<float> & latents, int64_t frames) {

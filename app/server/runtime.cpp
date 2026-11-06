@@ -2121,8 +2121,18 @@ ServerState::TimedTaskResult ServerState::run_model(
         throw std::runtime_error("configured model does not provide offline execution: " + model.config.id);
     }
     const auto started = Clock::now();
-    model.session->prepare(engine::runtime::build_preparation_request(request));
-    auto result = model.offline->run(request);
+    engine::runtime::TaskResult result;
+    try {
+        model.session->prepare(engine::runtime::build_preparation_request(request));
+        result = model.offline->run(request);
+    } catch (...) {
+        // A failed graph build can retain partially allocated GPU buffers.
+        // Release the failed session under the existing busy lock so a later
+        // request starts clean instead of cascading allocation failures.
+        model.unload();
+        last_activity_ms_.store(steady_now_ms(), std::memory_order_relaxed);
+        throw;
+    }
     // Mark activity at completion too: idle unload must measure from when the
     // request finished, not when it started, or a long inference would look idle
     // (and be unloaded) the moment it returns.

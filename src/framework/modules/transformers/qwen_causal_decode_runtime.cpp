@@ -546,7 +546,17 @@ public:
             token_ids.data(),
             0,
             token_ids.size() * sizeof(int32_t));
-        return run_prefill_into_decode_cache();
+        // The result has been read back and the K/V state belongs to the
+        // persistent decode graph. Do not retain the large prompt scratch
+        // buffers throughout decoding or while a larger cache is allocated.
+        try {
+            auto result = run_prefill_into_decode_cache();
+            release_prefill_graph();
+            return result;
+        } catch (...) {
+            release_prefill_graph();
+            throw;
+        }
     }
 
     QwenCausalPrefillResult prefill_embeddings(const std::vector<float> & embeddings, int64_t steps) {

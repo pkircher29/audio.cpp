@@ -21,7 +21,10 @@ namespace {
 namespace binding = engine::modules::binding;
 using Clock = std::chrono::steady_clock;
 
-constexpr int64_t kArDecodeChunkTokens = 5120;
+// Fit the standard 9000-token generation window in one cache allocation.
+// Refilling after 5120 tokens rebuilds a much larger quadratic prefill graph
+// (original melody/lyrics plus all emitted tokens), exhausting 12 GB GPUs.
+constexpr int64_t kArDecodeChunkTokens = 9216;
 
 struct GgmlContextDeleter {
     void operator()(ggml_context * ctx) const noexcept {
