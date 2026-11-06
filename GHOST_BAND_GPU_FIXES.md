@@ -1,7 +1,7 @@
-# Cover Studio GPU fixes
+# Ghost Band GPU fixes
 
 This is a compatibility fork of [0xShug0/audio.cpp](https://github.com/0xShug0/audio.cpp),
-which provides the native inference engine for [Cover Studio](https://github.com/pkircher29/cover-studio).
+which provides the native inference engine for [Ghost Band](https://github.com/pkircher29/ghost-band-v1).
 All upstream authorship, history, licenses, and vendored notices are retained.
 The music model is [YuE2 from the YuE project](https://github.com/multimodal-art-projection/YuE).
 
@@ -36,7 +36,7 @@ Real YuE2 generation on Arc B580 (12 GB), Q4_0 model and F16 VAE:
   89.919 seconds of stereo audio. Engine generation took 136 seconds; the whole
   cover stage including cold melody setup took about 218 seconds.
 
-The Cover Studio launcher uses 64 MiB weight-metadata arenas and 128 MiB graph
+The Ghost Band launcher uses 64 MiB weight-metadata arenas and 128 MiB graph
 metadata arenas. These are host-side no-alloc GGML contexts; model tensors still
 reside on the selected backend. The upstream multi-gigabyte metadata defaults
 exhausted host commit during our tests. This fork does not change those defaults;
